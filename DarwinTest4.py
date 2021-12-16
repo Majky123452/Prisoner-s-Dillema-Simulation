@@ -9,41 +9,40 @@ def Invert(x):
         return("Cooperated")
     return("Betrayed")
 
-
 class Pop:
     def __init__(self):
         self.cash = 0
         self.history = {}
 
-class Podrazák(Pop):
+class Traitor(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         return("Betrayed")
 
-class Kavka(Pop):
+class Saint(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         return("Cooperated")
 
-class Dobrý(Pop):
+class Good(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         x = random.randint(1, 4)
         if (x == 4):
             return("Betrayed")
         return("Cooperated")
 
-class Zlý(Pop):
+class Bad(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         x = random.randint(1, 4)
         if (x == 4):
             return("Cooperated")
@@ -53,36 +52,36 @@ class Amnesiac(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         if (random.randint(0, 1) == 1):
             return("Cooperated")
         else:
             return("Betrayed")
 
-class TitForTat(Pop):
+class TFT(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         for entity in list[opponent].history:
-            if (str(self) in entity) and (entity.split()[0] == str(opakovanie - 1)) and (
+            if (str(self) in entity) and (entity.split()[0] == str(repeat - 1)) and (
                     list[opponent].history[entity] == "Betrayed"):
                 return("Betrayed")
         return("Cooperated")
 
-class Veľký_Pes(Pop):
+class Big_Dog(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         opponent_has_betrayed = 0
         have_betrayed = 0
         for entity in list[opponent].history:
-            if (str(self) in entity) and (entity.split()[0] == str(opakovanie - 1)) and (
+            if (str(self) in entity) and (entity.split()[0] == str(repeat - 1)) and (
                     list[opponent].history[entity] == "Betrayed"):
                 opponent_has_betrayed = 1
         for entity in self.history:
-            if (str(list[opponent]) in entity) and (entity.split()[0] == str(opakovanie - 1)) and (
+            if (str(list[opponent]) in entity) and (entity.split()[0] == str(repeat - 1)) and (
                     self.history[entity] == "Betrayed"):
                 have_betrayed = 1
         if (opponent_has_betrayed == 1) and (have_betrayed == 1):
@@ -93,20 +92,20 @@ class Veľký_Pes(Pop):
             return("Betrayed")
         return("Cooperated")
 
-class Malý_Pes(Pop):
+class Small_Dog(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         opponent_has_betrayed = 0
         have_betrayed = 0
         if (list[opponent].history):
             for entity in list[opponent].history:
-                if (str(self) in entity) and (entity.split()[0] == str(opakovanie - 1)) and (
+                if (str(self) in entity) and (entity.split()[0] == str(repeat - 1)) and (
                         list[opponent].history[entity] == "Betrayed"):
                     opponent_has_betrayed = 1
             for entity in self.history:
-                if (str(list[opponent]) in entity) and (entity.split()[0] == str(opakovanie - 1)) and (
+                if (str(list[opponent]) in entity) and (entity.split()[0] == str(repeat - 1)) and (
                         self.history[entity] == "Betrayed"):
                     have_betrayed = 1
             if (opponent_has_betrayed == 1) and (have_betrayed == 1):
@@ -119,11 +118,11 @@ class Malý_Pes(Pop):
         else:
             return("Betrayed")
 
-class TitFor2Tat(Pop):
+class TF2T(Pop):
     def __init__(self):
         super().__init__()
 
-    def action(self, list, opakovanie, opponent):
+    def action(self, list, repeat, opponent):
         if (list[opponent].history):
             actions_to_self = [entity for entity in list[opponent].history if str(self) in entity]
             if (len(actions_to_self) > 1):
@@ -132,65 +131,64 @@ class TitFor2Tat(Pop):
                     return("Betrayed")
         return("Cooperated")
 
-def Setup(e, bruh, e2, e3,sum):
-    if (sum == ""):
-        sum = 0
+
+def Setup(e, tunr_temp, turns, class1_temp,mishap):
+    if (mishap == ""):
+        mishap = 0
     global class_1_growth
     global class_2_growth
     class_1_growth = []
     class_2_growth = []
     PopList = [f"človek{i + 1}" for i in range(0, int(e))]
-    type_list = (Amnesiac,TitFor2Tat,TitForTat,Kavka,Podrazák,Veľký_Pes,Malý_Pes,Dobrý,Zlý)
 
-    class_1 = eval(e2)
+    class_1 = eval(turns)
     for i in range(0, int(len(PopList) / 2)):
         PopList[i] = class_1()
 
-    class_2 = eval(e3)
+    class_2 = eval(class1_temp)
     for i in range(int(len(PopList) / 2), len(PopList)):
         PopList[i] = class_2()
     class_1_growth.append(len(PopList)/2)
     class_2_growth.append(len(PopList)/2)
-    TurnCycle(PopList, bruh, class_1,class_2,sum)
+    TurnCycle(PopList, tunr_temp, class_1,class_2,mishap)
 
-
-def TurnCycle(PopList, bruh, class_1,class_2,sum):
-    for opakovanie in range(0, int(bruh)):
+def TurnCycle(PopList, tunr_temp, class_1,class_2,mishap):
+    for repeat in range(0, int(tunr_temp)):
         i = 0
         for cycle in range(len(PopList) - 1):
             temp = 0
             while (temp != len(PopList) - 1 - cycle):
                 x = random.randint(1,100)
-                if (x <= int(sum)):
-                    value_1 = Invert(PopList[i].action(PopList, opakovanie, temp + 1 + i))
+                if (x <= int(mishap)):
+                    value_1 = Invert(PopList[i].action(PopList, repeat, temp + 1 + i))
                 else:
-                    value_1 = PopList[i].action(PopList, opakovanie, temp + 1 + i)
+                    value_1 = PopList[i].action(PopList, repeat, temp + 1 + i)
                 x = random.randint(1,100)
-                if (x <= int(sum)):
-                    value_2 = Invert(PopList[temp + 1 + i].action(PopList, opakovanie, i))
+                if (x <= int(mishap)):
+                    value_2 = Invert(PopList[temp + 1 + i].action(PopList, repeat, i))
                 else:
-                    value_2 = PopList[temp + 1 + i].action(PopList, opakovanie, i)
+                    value_2 = PopList[temp + 1 + i].action(PopList, repeat, i)
                 if (value_1 == "Betrayed") and (value_2 == "Betrayed"):
-                    PopList[i].cash += 1
-                    PopList[i].history[f"{opakovanie} {PopList[temp + 1 + i]}"] = "Betrayed"
+                    PopList[i].cash += 0
+                    PopList[i].history[f"{repeat} {PopList[temp + 1 + i]}"] = "Betrayed"
                     PopList[temp + 1 + i].cash += 1
-                    PopList[temp + 1 + i].history[f"{opakovanie} {PopList[i]}"] = "Betrayed"
+                    PopList[temp + 1 + i].history[f"{repeat} {PopList[i]}"] = "Betrayed"
 
                 elif ((value_1 == "Betrayed")) and (value_2 == "Cooperated"):
-                    PopList[temp + 1 + i].history[f"{opakovanie} {PopList[i]}"] = "Cooperated"
-                    PopList[i].cash += 7
-                    PopList[i].history[f"{opakovanie} {PopList[temp + 1 + i]}"] = "Betrayed"
+                    PopList[temp + 1 + i].history[f"{repeat} {PopList[i]}"] = "Cooperated"
+                    PopList[i].cash += 2
+                    PopList[i].history[f"{repeat} {PopList[temp + 1 + i]}"] = "Betrayed"
 
                 elif (value_1 == "Cooperated") and (value_2 == "Betrayed"):
-                    PopList[temp + 1 + i].cash += 7
-                    PopList[temp + 1 + i].history[f"{opakovanie} {PopList[i]}"] = "Betrayed"
-                    PopList[i].history[f"{opakovanie} {PopList[temp + 1 + i]}"] = "Cooperated"
+                    PopList[temp + 1 + i].cash += 3
+                    PopList[temp + 1 + i].history[f"{repeat} {PopList[i]}"] = "Betrayed"
+                    PopList[i].history[f"{repeat} {PopList[temp + 1 + i]}"] = "Cooperated"
 
                 elif (value_1 == "Cooperated") and (value_2 == "Cooperated"):
-                    PopList[i].cash += 5
-                    PopList[temp + 1 + i].cash += 5
-                    PopList[i].history[f"{opakovanie} {PopList[temp + 1 + i]}"] = "Cooperated"
-                    PopList[temp + 1 + i].history[f"{opakovanie} {PopList[i]}"] = "Cooperated"
+                    PopList[i].cash += 1
+                    PopList[temp + 1 + i].cash += 1
+                    PopList[i].history[f"{repeat} {PopList[temp + 1 + i]}"] = "Cooperated"
+                    PopList[temp + 1 + i].history[f"{repeat} {PopList[i]}"] = "Cooperated"
                 else:
                     temp -= 1
                 temp += 1
@@ -198,12 +196,21 @@ def TurnCycle(PopList, bruh, class_1,class_2,sum):
 
         group_1_cash = 0
         group_2_cash = 0
-        for sex in PopList:
-            if isinstance(sex,class_1):
-                group_1_cash += sex.cash
-            else:
-                group_2_cash += sex.cash
 
+        if (str(class_1) == str(class_2)):
+            filler = 0
+            for temp in PopList:
+                filler += temp.cash
+            group_1_cash = int(filler / 2)
+            group_2_cash = int(filler / 2)
+        else:
+            for temp_var in PopList:
+                if isinstance(temp_var,class_1):
+                    group_1_cash += temp_var.cash
+                else:
+                    group_2_cash += temp_var.cash
+        print(group_1_cash)
+        print(group_2_cash)
         for pop in range(0,group_1_cash):
             temp = "filler"
             PopList.insert(0,temp)
@@ -216,53 +223,48 @@ def TurnCycle(PopList, bruh, class_1,class_2,sum):
             PopList[-1] = class_2()
         class_2_growth.append(group_2_cash + class_2_growth[0])
 
-    turns = [i for i in range(0,int(bruh)+1)]
-    #print(turns)
-    #print(class_1_growth)
-    #print(class_2_growth)
-    #print(group_1_cash)
-    #print(group_2_cash)
+    turns = [i for i in range(0,int(tunr_temp)+1)]
 
     fig, axs = plt.subplots(1,2)
-    fig.suptitle('Vývin jednotlivých tried')
+    fig.suptitle('Evolution of classes')
     axs[0].plot(class_1_growth,turns)
     axs[1].plot(class_2_growth,turns)
-    axs[0].set(xlabel = "Počet jednotiek triedy", ylabel='Počet kôl', title="Trieda " + (str(class_1)).split(".")[1].split("'")[0])
-    axs[1].set(xlabel = "Počet jednotiek triedy", title="Trieda " + (str(class_2)).split(".")[1].split("'")[0])
+    axs[0].set(xlabel = "Number of units", ylabel='Number of turns', title="Class " + (str(class_1)).split(".")[1].split("'")[0])
+    axs[1].set(xlabel = "Number of units", title="Class " + (str(class_2)).split(".")[1].split("'")[0])
     plt.show()
 
-bruhma = Label(root, text="Sem zadaj počet požadovaných ľudí")
-bruhma.grid(row=0, column=0)
+Grid_Temp = Label(root, text="Number of units at start")
+Grid_Temp.grid(row=0, column=0)
 e = Entry(root)
 e.grid(row=1, column=0)
-temp = Button(root, text="confirm", command=lambda: Setup(e.get(), e2.get(),e3.get(), e4.get(),sum.get()))
+temp = Button(root, text="Confirm", command=lambda: Setup(e.get(), turns.get(),class1_temp.get(), class2_temp.get(),mishap.get()))
 temp.grid(row=3, column=1)
 
-bruhma = Label(root, text="Sem zadaj počet požadovaných kôl")
-bruhma.grid(row=0, column=2)
-e2 = Entry(root)
-e2.grid(row=1, column=2)
+Grid_Temp = Label(root, text="Number of simulated turns")
+Grid_Temp.grid(row=0, column=2)
+turns = Entry(root)
+turns.grid(row=1, column=2)
 
-bruhma = Label(root, text="Sem zadaj požadovaný šum (Nič = 0%)")
-bruhma.grid(row=0, column=1)
-sum = Entry(root)
-sum.grid(row=1, column=1)
+Grid_Temp = Label(root, text="Mishap chance (0 = None)")
+Grid_Temp.grid(row=0, column=1)
+mishap = Entry(root)
+mishap.grid(row=1, column=1)
 
-bruhma = Label(root, text="Sem zadaj triedu 1")
-bruhma.grid(row=2, column=0)
-e3 = Entry(root)
-e3.grid(row=3, column=0)
+Grid_Temp = Label(root, text="Insert class 1 here")
+Grid_Temp.grid(row=2, column=0)
+class1_temp = Entry(root)
+class1_temp.grid(row=3, column=0)
 
-bruhma = Label(root, text="Sem zadaj triedu 2")
-bruhma.grid(row=2, column=2)
-e4 = Entry(root)
-e4.grid(row=3, column=2)
+Grid_Temp = Label(root, text="Insert class 2 here")
+Grid_Temp.grid(row=2, column=2)
+class2_temp = Entry(root)
+class2_temp.grid(row=3, column=2)
 
-bruhma = Label(root, text="")
-bruhma.grid(row=4, column=1)
-bruhma = Label(root, text="Možnosti")
-bruhma.grid(row=5, column=1)
-bruhma = Label(root, text="Amnesiac,TitFor2Tat,TitForTat,Kavka,Podrazák,Veľký_Pes,Malý_Pes,Dobrý,Zlý")
-bruhma.grid(row=6, column=1)
+Grid_Temp = Label(root, text="")
+Grid_Temp.grid(row=4, column=1)
+Grid_Temp = Label(root, text="Available classes:")
+Grid_Temp.grid(row=5, column=1)
+Grid_Temp = Label(root, text="Amnesiac,TF2T,TFT,Saint,Traitor,Big_Dog,Small_Dog,Good,Bad")
+Grid_Temp.grid(row=6, column=1)
 
 root.mainloop()
